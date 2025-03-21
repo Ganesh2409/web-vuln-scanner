@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Scan Results for {{ scan.target_url }}</h2>
+        
+        {% if scan.vulnerabilities %}
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="px-4 py-2">Type</th>
+                        <th class="px-4 py-2">URL</th>
+                        <th class="px-4 py-2">Payload</th>
+                        <th class="px-4 py-2">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vuln in scan.vulnerabilities %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ vuln.vulnerability_type }}</td>
+                        <td class="px-4 py-2">{{ vuln.url }}</td>
+                        <td class="px-4 py-2">{{ vuln.payload }}</td>
+                        <td class="px-4 py-2">
+                            <span class="px-2 py-1 rounded-full bg-{{ 'red' if vuln.status == 'Open' else 'green' }}-100 text-{{ 'red' if vuln.status == 'Open' else 'green' }}-800">
+                                {{ vuln.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-gray-600">No vulnerabilities found.</p>
+        {% endif %}
+
+        <div class="mt-6">
+            <a
+                href="{{ url_for('index') }}"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Back to Home
+            </a>
+        </div>
+    </div>
+{% endblock %}

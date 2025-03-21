@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">New Scan</h2>
+        <form action="{{ url_for('start_scan') }}" method="POST" class="space-y-4">
+            <input
+                type="url"
+                name="url"
+                placeholder="Enter target URL"
+                required
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Start Scan
+            </button>
+        </form>
+    </div>
+
+    {% if current_user.is_authenticated %}
+        <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Scan History</h2>
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="px-4 py-2">URL</th>
+                        <th class="px-4 py-2">Date</th>
+                        <th class="px-4 py-2">Vulnerabilities Found</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">
+                            <a href="{{ url_for('results', scan_id=scan.id) }}" class="text-blue-600 hover:underline">
+                                {{ scan.target_url }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-2">{{ scan.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="px-4 py-2">{{ scan.vulnerabilities|length }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

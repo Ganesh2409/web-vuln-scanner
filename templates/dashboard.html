@@ -1,0 +1,272 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - WebVulnScan{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Dashboard</h1>
+        <div>
+            <a href="{{ url_for('new_scan') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Scan
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card card-dashboard">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-0">Total Targets</h6>
+                            <h2 class="my-2">{{ targets|length }}</h2>
+                            <p class="card-text mb-0">
+                                <a href="{{ url_for('targets') }}" class="text-decoration-none">View all</a>
+                            </p>
+                        </div>
+                        <div class="bg-light rounded p-3">
+                            <i class="bi bi-bullseye text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-0">Total Scans</h6>
+                            <h2 class="my-2">{{ scans|default([])|length }}</h2>
+                            <p class="card-text mb-0">
+                                <a href="{{ url_for('scans') }}" class="text-decoration-none">View all</a>
+                            </p>
+                        </div>
+                        <div class="bg-light rounded p-3">
+                            <i class="bi bi-search text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard high">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-0">Critical/High Issues</h6>
+                            <h2 class="my-2">{{ critical_high_count|default(0) }}</h2>
+                            <p class="card-text mb-0 text-danger">
+                                Require immediate attention
+                            </p>
+                        </div>
+                        <div class="bg-light rounded p-3">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard medium">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-0">Medium/Low Issues</h6>
+                            <h2 class="my-2">{{ medium_low_count|default(0) }}</h2>
+                            <p class="card-text mb-0 text-warning">
+                                Should be addressed
+                            </p>
+                        </div>
+                        <div class="bg-light rounded p-3">
+                            <i class="bi bi-shield-exclamation text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <!-- Recent Scans -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Scans</h5>
+                    <a href="{{ url_for('scans') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Target</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Findings</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_scans %}
+                                    {% for scan in recent_scans %}
+                                    <tr>
+                                        <td>{{ scan.target.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ scan.scan_type }}</span>
+                                        </td>
+                                        <td>{{ scan.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if scan.status == 'completed' %}
+                                                <span class="badge bg-success">Completed</span>
+                                            {% elif scan.status == 'pending' %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                            {% elif scan.status == 'running' %}
+                                                <span class="badge bg-primary">Running</span>
+                                            {% elif scan.status == 'failed' %}
+                                                <span class="badge bg-danger">Failed</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if scan.vulnerabilities|length > 0 %}
+                                            <span class="badge bg-danger">{{ scan.vulnerabilities|length }}</span>
+                                            {% else %}
+                                            <span class="badge bg-success">0</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('scan_results', scan_id=scan.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No scans performed yet</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vulnerability Distribution -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Vulnerability Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="vulnerabilityChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Target List -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Targets</h5>
+                    <a href="{{ url_for('targets') }}" class="btn btn-sm btn-outline-primary">Manage</a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% if targets %}
+                            {% for target in targets %}
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ target.name }}</h6>
+                                        <small>
+                                            <button class="btn btn-sm btn-primary" onclick="location.href='{{ url_for('new_scan') }}?target_id={{ target.id }}'">
+                                                <i class="bi bi-search"></i> Scan
+                                            </button>
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">{{ target.url }}</small>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <p class="mb-0">No targets added yet</p>
+                                <a href="{{ url_for('targets') }}" class="btn btn-sm btn-primary mt-2">
+                                    <i class="bi bi-plus-circle"></i> Add Target
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Security Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-lightbulb text-warning me-2"></i> Keep Your Software Updated</h6>
+                        <p class="small text-muted">Regularly update all software components to patch known vulnerabilities.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="bi bi-lightbulb text-warning me-2"></i> Implement Input Validation</h6>
+                        <p class="small text-muted">Always validate user input on both client and server side.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="bi bi-lightbulb text-warning me-2"></i> Use HTTPS Everywhere</h6>
+                        <p class="small text-muted">Protect data in transit by enforcing HTTPS across your entire site.</p>
+                    </div>
+                    <div>
+                        <h6><i class="bi bi-lightbulb text-warning me-2"></i> Practice Defense in Depth</h6>
+                        <p class="small text-muted">Implement multiple layers of security controls to protect your applications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sample data - in a real app, this would come from the backend
+        const vulnerabilityData = {
+            labels: ['XSS', 'SQL Injection', 'CSRF', 'Insecure Headers', 'File Inclusion', 'Information Disclosure'],
+            datasets: [{
+                label: 'Vulnerabilities Found',
+                data: [12, 8, 5, 7, 3, 9],
+                backgroundColor: [
+                    '#dc3545', // Red
+                    '#fd7e14', // Orange
+                    '#ffc107', // Yellow
+                    '#20c997', // Teal
+                    '#0dcaf0', // Cyan
+                    '#6f42c1'  // Purple
+                ]
+            }]
+        };
+
+        const ctx = document.getElementById('vulnerabilityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: vulnerabilityData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

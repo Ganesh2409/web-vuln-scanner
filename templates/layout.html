@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Vulnerability Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-blue-600 text-white py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Web Vulnerability Scanner</h1>
+            <nav>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('index') }}" class="mx-2 hover:underline">Home</a>
+                    <a href="{{ url_for('logout') }}" class="mx-2 hover:underline">Sign Out</a>
+                {% else %}
+                    <a href="{{ url_for('index') }}" class="mx-2 hover:underline">Home</a>
+                    <a href="{{ url_for('login') }}" class="mx-2 hover:underline">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="mx-2 hover:underline">Sign Up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>Vulnerability Scanner © 2024</p>
+        </div>
+    </footer>
+</body>
+</html>
